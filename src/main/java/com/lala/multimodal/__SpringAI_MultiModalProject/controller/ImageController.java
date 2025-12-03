@@ -1,6 +1,7 @@
 package com.lala.multimodal.__SpringAI_MultiModalProject.controller;
 
 import com.lala.multimodal.__SpringAI_MultiModalProject.service.ImageService;
+import com.lala.multimodal.__SpringAI_MultiModalProject.service.TextToAudioService;
 import com.lala.multimodal.__SpringAI_MultiModalProject.service.TextToImageService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +16,11 @@ public class ImageController {
 
     private final ImageService service;
     private final TextToImageService textToImageService;
-    public ImageController(ImageService service, TextToImageService textToImageService){
+    private final TextToAudioService textToAudioService;
+    public ImageController(ImageService service, TextToImageService textToImageService, TextToAudioService textToAudioService){
         this.service = service;
         this.textToImageService = textToImageService;
+        this.textToAudioService=textToAudioService;
     }
     @GetMapping("/ask")
     public ResponseEntity<String> ask(@RequestParam("imageName")String imageName,@RequestParam("question")String question){
@@ -40,6 +43,20 @@ public class ImageController {
                     .contentType(MediaType.IMAGE_PNG)
                     .body(response);
                     } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error while generating answers :"+e.getMessage());
+        }
+
+    }
+
+
+    @GetMapping("/ask-audio")
+    public ResponseEntity<?> askAudio(@RequestParam("message")String message){
+        try{
+            byte[] response =  textToAudioService.getAudio(message);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.valueOf("audio/mpeg"))
+                    .body(response);
+        } catch (Exception e) {
             return ResponseEntity.status(500).body("Error while generating answers :"+e.getMessage());
         }
 
